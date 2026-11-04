@@ -1,0 +1,29 @@
+# Скопируйте в archivarius.yaml и измените под себя.
+# Любой параметр можно переопределить переменной окружения ARCHIVARIUS_<ИМЯ>,
+# например ARCHIVARIUS_LLM_MODEL=gemma3:12b
+
+# Ollama
+ollama_url: http://127.0.0.1:11434
+embed_model: bge-m3          # мультиязычная модель эмбеддингов, хорошо работает с русским
+llm_model: qwen3:8b          # модель генерации ответов
+request_timeout: 600         # секунд на ответ модели; первый запрос дольше, модель грузится в память
+temperature: 0.1
+num_ctx: 8192                # размер контекста модели в токенах
+think: false                 # режим рассуждений для моделей, которые его поддерживают
+
+# Индекс
+index_path: .archivarius/index.db
+chunk_size: 1000             # длина фрагмента в символах
+chunk_overlap: 150           # перекрытие соседних фрагментов
+embed_batch_size: 32
+query_prefix: ""             # префиксы для моделей семейства e5: "query: " и "passage: "
+passage_prefix: ""
+
+# Поиск
+top_k: 5
+search_mode: hybrid          # bm25 | dense | hybrid
+rrf_k: 60                    # параметр Reciprocal Rank Fusion
+candidate_pool: 10           # кандидатов от каждого метода перед слиянием
+max_chunks_per_doc: 2        # не больше фрагментов из одного документа, 0 без ограничения
+bm25_k1: 1.5
+bm25_b: 0.75

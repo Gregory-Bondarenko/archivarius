@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Индекс, локальные настройки и личные документы
+.archivarius/
+archivarius.yaml
+reports/
+data/
+private/
+
+# IDE и ОС
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

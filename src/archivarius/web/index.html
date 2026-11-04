@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Archivarius</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #151b23;
+    --line: #262c36;
+    --line-strong: #3d444d;
+    --text: #e6edf3;
+    --text-2: #b1bac4;
+    --muted: #8b949e;
+    --accent: #79c0ff;
+    --accent-ink: #0d1117;
+    --accent-soft: rgb(121 192 255 / 0.12);
+    --danger: #ff7b72;
+    --radius: 6px;
+    --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", "JetBrains Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --line: #dfe3e8;
+      --line-strong: #c4ccd5;
+      --text: #1f2328;
+      --text-2: #3d444d;
+      --muted: #59636e;
+      --accent: #0969da;
+      --accent-ink: #ffffff;
+      --accent-soft: rgb(9 105 218 / 0.08);
+      --danger: #cf222e;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button, textarea { font: inherit; color: inherit; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+  /* Верхняя строка */
+  .bar {
+    height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { font-weight: 650; font-size: 16px; letter-spacing: -0.01em; }
+  .status { display: flex; gap: 20px; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; }
+  .status .models { font-family: var(--mono); font-size: 12px; }
+
+  /* Вопрос */
+  .query { padding: 40px 0 28px; border-bottom: 1px solid var(--line); }
+  .query textarea {
+    display: block; width: 100%; resize: none; overflow: hidden;
+    background: transparent; border: 0; padding: 0;
+    font-size: clamp(20px, 2.2vw, 26px); line-height: 1.35; letter-spacing: -0.01em;
+    min-height: 1.35em;
+  }
+  .query textarea::placeholder { color: var(--muted); }
+  .query textarea:focus-visible { outline: none; }
+  .controls { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+  .group { display: flex; align-items: center; gap: 10px; }
+  .group-label { color: var(--muted); font-size: 13px; }
+  .seg {
+    display: inline-flex; padding: 2px; gap: 2px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  }
+  .seg button {
+    border: 0; background: transparent; padding: 5px 11px; border-radius: 4px;
+    font-size: 13px; color: var(--text-2); cursor: pointer;
+  }
+  .seg button:hover { color: var(--text); }
+  .seg button[aria-checked="true"] { background: var(--line); color: var(--text); }
+  .submit {
+    margin-left: auto; border: 0; border-radius: var(--radius); cursor: pointer;
+    background: var(--accent); color: var(--accent-ink);
+    font-weight: 600; font-size: 14px; padding: 8px 18px; white-space: nowrap;
+  }
+  .submit:active { transform: translateY(1px); }
+  .submit:disabled { opacity: 0.55; cursor: progress; }
+  .hint { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+
+  /* Пустое состояние */
+  .empty { padding: 48px 0 80px; max-width: 760px; }
+  .empty h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .empty p { color: var(--muted); margin: 0 0 22px; }
+  .doclist { list-style: none; margin: 0; padding: 0; columns: 2 260px; column-gap: 40px; }
+  .doclist li {
+    break-inside: avoid; display: flex; justify-content: space-between; gap: 16px;
+    padding: 7px 0; border-bottom: 1px solid var(--line);
+  }
+  .doclist .name { font-family: var(--mono); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .doclist .count { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .empty pre {
+    font-family: var(--mono); font-size: 13px; margin: 0;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+  }
+
+  /* Результат */
+  .result {
+    display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px;
+    padding: 36px 0 96px; align-items: start;
+  }
+  .col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 0 0 14px; min-height: 20px; }
+  .col-head h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0; }
+  .phase { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .prose { font-size: 16.5px; line-height: 1.7; max-width: 68ch; color: var(--text); }
+  .prose p { margin: 0 0 14px; }
+  .prose ul, .prose ol { margin: 0 0 14px; padding-left: 22px; }
+  .prose li { margin: 4px 0; }
+  .prose code {
+    font-family: var(--mono); font-size: 0.88em;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px;
+  }
+  .prose.error { color: var(--danger); }
+  .cite {
+    display: inline-block; min-width: 20px; padding: 0 5px; margin: 0 1px;
+    border-radius: 4px; background: var(--accent-soft); color: var(--accent);
+    font: 600 12px/20px var(--mono); text-align: center; vertical-align: 1px;
+    cursor: pointer; border: 0;
+  }
+  .caret {
+    display: inline-block; width: 7px; height: 1.05em; vertical-align: -0.15em;
+    background: var(--accent); margin-left: 2px; animation: blink 1s steps(2) infinite;
+  }
+  .timings { margin-top: 18px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+
+  .skeleton { display: grid; gap: 12px; max-width: 68ch; }
+  .skeleton span { height: 12px; border-radius: 3px; background: var(--line); animation: pulse 1.4s ease-in-out infinite; }
+  .skeleton span:nth-child(2) { width: 92%; }
+  .skeleton span:nth-child(3) { width: 64%; }
+
+  .sources { position: sticky; top: 24px; }
+  .srclist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .src {
+    position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 8px;
+    padding: 12px 14px 12px 14px; border-radius: var(--radius);
+    transition: background-color 0.15s ease, opacity 0.2s ease;
+  }
+  .src::before {
+    content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px;
+    border-radius: 2px; background: transparent;
+  }
+  .src.cited::before { background: var(--accent); }
+  .src.dim { opacity: 0.55; }
+  .src.dim:hover, .src.hl { opacity: 1; }
+  .src.hl { background: var(--accent-soft); }
+  .src .n { font: 600 12px/21px var(--mono); color: var(--muted); }
+  .src-body { min-width: 0; }
+  .src-head {
+    display: grid; gap: 1px; width: 100%;
+    background: none; border: 0; padding: 0; text-align: left; cursor: pointer;
+  }
+  .src.cited .n { color: var(--accent); }
+  .src .t { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+  .src .loc { color: var(--muted); font-size: 12.5px; }
+  .src .snip {
+    margin: 8px 0 0; color: var(--text-2); font-size: 13.5px; line-height: 1.55;
+    white-space: pre-line;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .src.open .snip { display: block; }
+  .src .ranks { margin: 6px 0 0; color: var(--muted); font: 11.5px var(--mono); }
+  .src-skel { height: 64px; border-radius: var(--radius); background: var(--surface); animation: pulse 1.4s ease-in-out infinite; }
+
+  @keyframes pulse { 50% { opacity: 0.45; } }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes enter { from { opacity: 0; transform: translateY(4px); } }
+  .src { animation: enter 0.25s ease both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  @media (max-width: 860px) {
+    .wrap { padding: 0 18px; }
+    .status .models, .hint { display: none; }
+    .result { grid-template-columns: 1fr; gap: 36px; }
+    .sources { position: static; }
+    .submit { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="brand">archivarius</div>
+    <div class="status" id="status" aria-live="polite">
+      <span id="stat-index">загрузка индекса…</span>
+      <span class="models" id="stat-models"></span>
+    </div>
+  </header>
+
+  <form class="query" id="form" autocomplete="off">
+    <label class="sr-only" for="q">Вопрос по документам</label>
+    <textarea id="q" rows="1" placeholder="Задайте вопрос по документам" required></textarea>
+    <div class="controls">
+      <div class="group">
+        <span class="group-label" id="mode-label">Поиск</span>
+        <div class="seg" role="radiogroup" aria-labelledby="mode-label" data-name="mode">
+          <button type="button" role="radio" data-value="hybrid" aria-checked="true">Гибридный</button>
+          <button type="button" role="radio" data-value="dense" aria-checked="false">По смыслу</button>
+          <button type="button" role="radio" data-value="bm25" aria-checked="false">По словам</button>
+        </div>
+      </div>
+      <div class="group">
+        <span class="group-label" id="k-label">Фрагментов</span>
+        <div class="seg" role="radiogroup" aria-labelledby="k-label" data-name="k">
+          <button type="button" role="radio" data-value="3" aria-checked="false">3</button>
+          <button type="button" role="radio" data-value="5" aria-checked="true">5</button>
+          <button type="button" role="radio" data-value="8" aria-checked="false">8</button>
+        </div>
+      </div>
+      <span class="hint">Enter отправить, Shift+Enter перенос</span>
+      <button class="submit" id="submit" type="submit">Спросить</button>
+    </div>
+  </form>
+
+  <section class="empty" id="empty" aria-live="polite"></section>
+
+  <section class="result" id="result" hidden>
+    <article>
+      <div class="col-head"><h2>Ответ</h2><span class="phase" id="phase" aria-live="polite"></span></div>
+      <div class="prose" id="answer"></div>
+      <div class="timings" id="timings"></div>
+    </article>
+    <aside class="sources" aria-labelledby="sources-title">
+      <div class="col-head"><h2 id="sources-title">Источники</h2></div>
+      <ol class="srclist" id="sources"></ol>
+    </aside>
+  </section>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+}[c]));
+
+function plural(n, one, few, many) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+}
+
+/* Сегментированные переключатели */
+const state = { mode: "hybrid", k: 5 };
+document.querySelectorAll(".seg").forEach((seg) => {
+  seg.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String(b === btn)));
+    state[seg.dataset.name] = seg.dataset.name === "k" ? Number(btn.dataset.value) : btn.dataset.value;
+  });
+});
+
+/* Поле вопроса: автовысота, Enter отправляет, / фокусирует */
+const q = $("q");
+function autosize() { q.style.height = "auto"; q.style.height = q.scrollHeight + "px"; }
+q.addEventListener("input", autosize);
+q.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+    e.preventDefault();
+    $("form").requestSubmit();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "/" && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+});
+
+/* Минимальная разметка ответа: абзацы, списки, жирный, код, формулы, ссылки [n] */
+function inline(text) {
+  return esc(text)
+    .replace(/\\\((.+?)\\\)/g, (m, f) => `<code>${f}</code>`)
+    .replace(/\\\[(.+?)\\\]/g, (m, f) => `<code>${f}</code>`)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[(\d{1,3})\]/g, '<button type="button" class="cite" data-n="$1" aria-label="Источник $1">$1</button>');
+}
+function renderMarkdown(text) {
+  // Пустые строки между пунктами не разрывают список: модели часто так пишут
+  const out = [];
+  let list = null;
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    const ul = line.match(/^[-*•]\s+(.*)/);
+    const ol = line.match(/^\d+[.)]\s+(.*)/);
+    if (ul || ol) {
+      const tag = ul ? "ul" : "ol";
+      if (list !== tag) { close(); out.push(`<${tag}>`); list = tag; }
+      out.push(`<li>${inline((ul || ol)[1])}</li>`);
+    } else {
+      close();
+      out.push(`<p>${inline(line)}</p>`);
+    }
+  }
+  close();
+  return out.join("");
+}
+
+/* Индекс и пустое состояние */
+async function loadIndex() {
+  try {
+    const [stats, docs] = await Promise.all([
+      fetch("/api/stats").then((r) => r.json()),
+      fetch("/api/documents").then((r) => r.json()),
+    ]);
+    const d = stats.documents, c = stats.chunks;
+    $("stat-index").textContent =
+      `${d} ${plural(d, "документ", "документа", "документов")}, ${c} ${plural(c, "фрагмент", "фрагмента", "фрагментов")}`;
+    $("stat-models").textContent = [stats.embed_model, stats.llm_model].filter(Boolean).join(" / ");
+    renderEmpty(docs.documents);
+  } catch {
+    $("stat-index").textContent = "сервер не отвечает";
+    $("empty").innerHTML = '<h2>Нет связи с сервером</h2><p>Проверьте, что запущена команда <code>archivarius serve</code>, и обновите страницу.</p>';
+  }
+}
+function renderEmpty(docs) {
+  if (!docs.length) {
+    $("empty").innerHTML =
+      "<h2>Индекс пуст</h2><p>Добавьте документы командой в терминале, затем обновите страницу.</p>" +
+      "<pre>archivarius index ПАПКА_С_ДОКУМЕНТАМИ</pre>";
+    return;
+  }
+  const items = docs.map((doc) =>
+    `<li title="${esc(doc.path)}"><span class="name">${esc(doc.title)}</span>` +
+    `<span class="count">${doc.chunks} ${plural(doc.chunks, "фрагмент", "фрагмента", "фрагментов")}</span></li>`
+  ).join("");
+  $("empty").innerHTML =
+    `<h2>Что есть в индексе</h2><p>Ответ строится только по этим документам, со ссылками на фрагменты.</p>` +
+    `<ul class="doclist">${items}</ul>`;
+}
+
+/* Источники */
+function snippet(s) {
+  // Первая строка фрагмента часто повторяет заголовок раздела, который уже показан в месте
+  const lines = s.text.split("\n");
+  const section = (s.location || "").split(" / ").pop();
+  if (lines.length > 1 && section && lines[0].trim() === section.trim()) lines.shift();
+  return lines.join("\n");
+}
+function renderSources(sources) {
+  if (!sources.length) {
+    $("sources").innerHTML = '<li class="src"><span class="loc">Подходящих фрагментов не найдено</span></li>';
+    return;
+  }
+  $("sources").innerHTML = sources.map((s, i) => {
+    const ranks = [
+      s.sparse_rank ? `по словам ${s.sparse_rank}` : null,
+      s.dense_rank ? `по смыслу ${s.dense_rank}` : null,
+    ].filter(Boolean).join(", ");
+    return `<li class="src" id="src-${i + 1}" style="animation-delay:${i * 40}ms">
+      <span class="n">${i + 1}</span>
+      <div class="src-body">
+        <button type="button" class="src-head" aria-expanded="false">
+          <span class="t">${esc(s.title)}</span>
+          <span class="loc">${esc(s.location || "весь документ")}</span>
+        </button>
+        <p class="snip">${esc(snippet(s))}</p>
+        ${ranks ? `<p class="ranks">место: ${ranks}</p>` : ""}
+      </div>
+    </li>`;
+  }).join("");
+}
+$("sources").addEventListener("click", (e) => {
+  const head = e.target.closest(".src-head");
+  if (!head) return;
+  const li = head.closest(".src");
+  li.classList.toggle("open");
+  head.setAttribute("aria-expanded", String(li.classList.contains("open")));
+});
+
+function highlight(n, on) {
+  const el = $("src-" + n);
+  if (!el) return;
+  el.classList.toggle("hl", on);
+  if (on) el.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+$("answer").addEventListener("mouseover", (e) => { const c = e.target.closest(".cite"); if (c) highlight(c.dataset.n, true); });
+$("answer").addEventListener("mouseout", (e) => { const c = e.target.closest(".cite"); if (c) highlight(c.dataset.n, false); });
+$("answer").addEventListener("click", (e) => {
+  const c = e.target.closest(".cite");
+  if (!c) return;
+  const el = $("src-" + c.dataset.n);
+  if (el) { el.classList.add("open"); el.querySelector(".src-head").setAttribute("aria-expanded", "true"); highlight(c.dataset.n, true); }
+});
+
+/* Запрос */
+let timer = null;
+function setPhase(text, startedAt) {
+  clearInterval(timer);
+  const tick = () => {
+    const s = startedAt ? ` ${((performance.now() - startedAt) / 1000).toFixed(0)} с` : "";
+    $("phase").textContent = text + s;
+  };
+  tick();
+  if (startedAt) timer = setInterval(tick, 500);
+}
+function showSkeleton() {
+  $("answer").className = "prose";
+  $("answer").innerHTML = '<div class="skeleton"><span></span><span></span><span></span></div>';
+  $("sources").innerHTML = '<li class="src-skel"></li><li class="src-skel"></li><li class="src-skel"></li>';
+  $("timings").textContent = "";
+}
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const question = q.value.trim();
+  if (!question) return;
+  $("empty").hidden = true;
+  $("result").hidden = false;
+  $("submit").disabled = true;
+  showSkeleton();
+  setPhase("Поиск фрагментов");
+
+  let raw = "";
+  let streaming = false;
+  const t0 = performance.now();
+  try {
+    const response = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, mode: state.mode, k: state.k, stream: true }),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(typeof body.detail === "string" ? body.detail : response.statusText);
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = buffer.indexOf("\n")) >= 0) {
+        const line = buffer.slice(0, nl);
+        buffer = buffer.slice(nl + 1);
+        if (!line.trim()) continue;
+        const ev = JSON.parse(line);
+        if (ev.type === "sources") {
+          renderSources(ev.sources);
+          setPhase("Модель читает фрагменты", performance.now());
+        } else if (ev.type === "token") {
+          if (!streaming) { streaming = true; setPhase("Модель отвечает", t0); }
+          raw += ev.text;
+          $("answer").innerHTML = renderMarkdown(raw) + '<span class="caret" aria-hidden="true"></span>';
+        } else if (ev.type === "done") {
+          clearInterval(timer);
+          $("phase").textContent = "";
+          $("answer").innerHTML = renderMarkdown(raw) || "<p>Модель не вернула ответ.</p>";
+          const cited = new Set(ev.citations);
+          document.querySelectorAll(".src[id]").forEach((el) => {
+            const n = Number(el.id.slice(4));
+            el.classList.add(cited.has(n) ? "cited" : "dim");
+          });
+          const t = ev.timings;
+          $("timings").textContent =
+            `поиск ${(t.retrieval_ms / 1000).toFixed(1)} с, генерация ${(t.generation_ms / 1000).toFixed(1)} с`;
+        } else if (ev.type === "error") {
+          throw new Error(ev.message);
+        }
+      }
+    }
+  } catch (err) {
+    clearInterval(timer);
+    $("phase").textContent = "";
+    $("answer").className = "prose error";
+    $("answer").textContent = "Не удалось получить ответ. " + err.message;
+    if (!document.querySelector(".src[id]")) $("sources").innerHTML = "";
+  } finally {
+    $("submit").disabled = false;
+  }
+});
+
+loadIndex();
+q.focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{"question": "Как отменить коммит, который уже отправлен в общий репозиторий?", "relevant": ["git.md"]}
+{"question": "Каким способом вливают одобренный pull request?", "relevant": ["git.md"]}
+{"question": "Как восстановить случайно удалённую ветку?", "relevant": ["git.md"]}
+{"question": "Как активировать виртуальное окружение в Windows?", "relevant": ["python-env.md"]}
+{"question": "Почему перед коммитом нужно очищать вывод ячеек ноутбука?", "relevant": ["python-env.md"]}
+{"question": "Какой инструмент используется для форматирования кода?", "relevant": ["python-env.md"]}
+{"question": "Чем RANK отличается от DENSE_RANK?", "relevant": ["sql-window-functions.md"]}
+{"question": "Как найти последний заказ каждого клиента?", "relevant": ["sql-window-functions.md"]}
+{"question": "Как посчитать время между соседними визитами пользователя?", "relevant": ["sql-window-functions.md"]}
+{"question": "Какая рамка окна действует по умолчанию при наличии ORDER BY?", "relevant": ["sql-window-functions.md"]}
+{"question": "Сколько должен длиться эксперимент как минимум?", "relevant": ["ab-testing.md"]}
+{"question": "Что делать, если группы теста получились неравного размера?", "relevant": ["ab-testing.md"]}
+{"question": "Как уменьшить дисперсию метрики в эксперименте?", "relevant": ["ab-testing.md"]}
+{"question": "Почему нельзя останавливать тест при первом значимом результате?", "relevant": ["ab-testing.md"]}
+{"question": "В каком порядке писать инструкции Dockerfile, чтобы сборка шла быстрее?", "relevant": ["docker.md"]}
+{"question": "Куда сохранять данные, чтобы они не пропали после удаления контейнера?", "relevant": ["docker.md"]}
+{"question": "Как запустить несколько связанных сервисов одной командой?", "relevant": ["docker.md"]}
+{"question": "Как передавать пароли приложению в контейнере?", "relevant": ["docker.md"]}
+{"question": "Когда проверка объёма загрузки считается ошибкой?", "relevant": ["data-quality.md"]}
+{"question": "Что происходит с витриной, если проверка не прошла?", "relevant": ["data-quality.md"]}
+{"question": "Какие сведения содержит карточка витрины?", "relevant": ["data-quality.md"]}
+{"question": "Где фиксировать изменения в описании витрины и в правилах веток?", "relevant": ["data-quality.md", "git.md"]}

@@ -1,0 +1,57 @@
+# Корпус для оценки поиска: статьи русской Википедии по статистике и машинному обучению
+# Темы близкие, с общей лексикой: так режимы поиска заметно различаются
+# файл	название статьи
+normal-distribution	Нормальное распределение
+poisson-distribution	Распределение Пуассона
+binomial-distribution	Биномиальное распределение
+exponential-distribution	Экспоненциальное распределение
+student-t-distribution	Распределение Стьюдента
+chi-squared-distribution	Распределение хи-квадрат
+central-limit-theorem	Центральная предельная теорема
+law-of-large-numbers	Закон больших чисел
+expected-value	Математическое ожидание
+variance	Дисперсия случайной величины
+median	Медиана (статистика)
+correlation	Корреляция
+hypothesis-testing	Проверка статистических гипотез
+p-value	P-значение
+type-i-ii-errors	Ошибки первого и второго рода
+student-t-test	T-критерий Стьюдента
+pearson-chi-squared-test	Критерий согласия Пирсона
+mann-whitney-u-test	U-критерий Манна — Уитни
+confidence-interval	Доверительный интервал
+bootstrap	Бутстрэп (статистика)
+maximum-likelihood	Метод максимального правдоподобия
+least-squares	Метод наименьших квадратов
+bayes-theorem	Теорема Байеса
+multiple-comparisons	Поправка на множественную проверку гипотез
+ab-testing	A/B-тестирование
+linear-regression	Линейная регрессия
+logistic-regression	Логистическая регрессия
+knn	Метод k ближайших соседей
+svm	Метод опорных векторов
+decision-tree	Дерево решений
+random-forest	Метод случайного леса
+boosting	Бустинг
+naive-bayes	Наивный байесовский классификатор
+k-means	Метод k-средних
+dbscan	DBSCAN
+cluster-analysis	Кластерный анализ
+pca	Метод главных компонент
+overfitting	Переобучение
+cross-validation	Перекрёстная проверка
+regularization	Регуляризация (математика)
+gradient-descent	Градиентный спуск
+sgd	Стохастический градиентный спуск
+neural-network	Нейронная сеть
+backpropagation	Метод обратного распространения ошибки
+cnn	Свёрточная нейронная сеть
+rnn	Рекуррентная нейронная сеть
+lstm	Долгая краткосрочная память
+transformer	Трансформер (модель машинного обучения)
+word2vec	Word2vec
+tf-idf	TF-IDF
+reinforcement-learning	Обучение с подкреплением
+roc-curve	ROC-кривая
+information-retrieval	Информационный поиск
+entropy	Информационная энтропия
